@@ -5,6 +5,8 @@ import Html.Events exposing (onClick)
 import Html.Attributes exposing (id, class, src)
 import Http
 import Json.Decode as Decode
+import Date exposing (..)
+import Time exposing (Time)
 
 import Spinner exposing (spinner)
 
@@ -21,6 +23,7 @@ type alias Model =
   { updatedAt : String
   , syncHappening: Bool
   , syncMessage : String
+  , error : String
   }
 
 init : ( Model, Cmd Msg )
@@ -31,6 +34,7 @@ initialModel =
   { updatedAt = ""
   , syncHappening = False
   , syncMessage = ""
+  , error = ""
   }
 
 fetchDeck : Cmd Msg
@@ -43,13 +47,14 @@ fetchDeck =
 
 type Msg
   = FetchDeck String
-  | Deck (Result Http.Error String)
+  | Deck (Result Http.Error Int)
   | Sync
   | SyncMessage String
 
 view : Model -> Html Msg
 view model = div []
   [ h3 [] [ text "Last Updated:" ]
+  , h3 [] [ text model.error ]
   , h4 [] [ text model.updatedAt ]
   , button [
       id "sync_button",
@@ -70,9 +75,24 @@ syncDiv visible message =
   in
     div [ class (display ++ " mv2") ] [ text message ]
 
-decodeData : Decode.Decoder String
+decodeData : Decode.Decoder Int
 decodeData =
-  Decode.at ["payload"] Decode.string
+  Decode.at ["mod"] Decode.int
+
+formatUpdatedAt : Int -> String
+formatUpdatedAt int =
+  let
+      date = (int * 1000) |> toFloat |> Date.fromTime
+  in
+     toString(dayOfWeek(date)) ++ " " ++
+     toString(day(date)) ++ " " ++
+     toString(month(date)) ++ " at " ++
+     doubleDigit(hour(date)) ++ ":" ++
+     doubleDigit(minute(date))
+
+doubleDigit : Int -> String
+doubleDigit int =
+    if int < 10 then "0" ++ (toString int) else  toString int
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -80,9 +100,11 @@ update msg model =
     FetchDeck url ->
       ( model, fetchDeck )
     Deck (Ok updatedAt) ->
-      ({ model | updatedAt = updatedAt }, Cmd.none)
-    Deck (Err _) ->
-      (model, Cmd.none)
+      ({ model | updatedAt = (formatUpdatedAt updatedAt) }, Cmd.none)
+    Deck (Err (Http.BadPayload error _)) ->
+      ({model | error = error }, Cmd.none)
+    Deck (Err unknownErr) ->
+      ({model | error = "Unknown Error: " ++ (toString unknownErr)}, Cmd.none)
     Sync ->
       ({ model | syncHappening = True }, sync "deck" )
     SyncMessage syncMessage ->
