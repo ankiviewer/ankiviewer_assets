@@ -7,7 +7,6 @@ import Http
 import Json.Decode as Decode
 import Date exposing (..)
 import Time exposing (Time)
-
 import Spinner exposing (spinner)
 
 main : Program Never Model Msg
@@ -27,15 +26,7 @@ type alias Model =
   }
 
 init : ( Model, Cmd Msg )
-init = ( initialModel, fetchDeck )
-
-initialModel : Model
-initialModel =
-  { updatedAt = ""
-  , syncHappening = False
-  , syncMessage = ""
-  , error = ""
-  }
+init = ( Model "" False "" "", fetchDeck )
 
 fetchDeck : Cmd Msg
 fetchDeck =
@@ -46,7 +37,7 @@ fetchDeck =
      Http.send Deck request
 
 type Msg
-  = FetchDeck String
+  = FetchDeck
   | Deck (Result Http.Error Int)
   | Sync
   | SyncMessage String
@@ -97,7 +88,7 @@ doubleDigit int =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
-    FetchDeck url ->
+    FetchDeck ->
       ( model, fetchDeck )
     Deck (Ok updatedAt) ->
       ({ model | updatedAt = (formatUpdatedAt updatedAt) }, Cmd.none)
