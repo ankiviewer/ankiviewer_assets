@@ -9,7 +9,7 @@ import Date exposing (..)
 import Time exposing(Time)
 import Spinner exposing (spinner)
 import Json.Decode exposing (list, int, string, Decoder)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (decode, required, optional)
 
 main : Program Never Model Msg
 main
@@ -24,14 +24,39 @@ type alias Model =
     { collection : ACollection
     , decks : List ADeck
     , models : List AModel
+    , notes : List Note
     , error : String
     }
 
 type alias CollectionRes =
     { error : String
-    , payload : Payload
+    , payload : Collection
     }
-type alias Payload =
+
+type alias NotesRes =
+    { error: String
+    , payload : List Note
+    }
+
+type alias Note =
+    { cid : Int
+    , nid : Int
+    , cmod : Int
+    , nmod : Int
+    , mid : Int
+    , tags : String
+    , flds : String
+    , sfld : String
+    , did : Int
+    , ord : Int
+    , ttype : Int
+    , queue : Int
+    , due : Int
+    , reps : Int
+    , lapses : Int
+    }
+
+type alias Collection =
     { collection : ACollection
     , decks : List ADeck
     , models : List AModel
@@ -58,16 +83,7 @@ type alias AModel =
 
 init : ( Model, Cmd Msg )
 init =
-    let
-        collection = { crt = 0, mod = 0, tags = []}
-        model =
-            { collection = collection
-            , decks = []
-            , models = []
-            , error = ""
-            }
-    in
-        ( model, fetchCollection )
+    ( Model (ACollection 0 0 []) [] [] [] "", fetchCollection )
 
 fetchCollection : Cmd Msg
 fetchCollection =
@@ -75,17 +91,52 @@ fetchCollection =
         request =
             Http.get "/api/collection" decodeCollection
     in
-       Http.send FetchedCollection request
+        Http.send FetchedCollection request
+
+fetchNotes : Cmd Msg
+fetchNotes =
+    let
+        request =
+            Http.get "/api/notes" decodeNotes
+    in
+       Http.send FetchedNotes request
+
+decodeNotes : Decoder NotesRes
+decodeNotes =
+    decode NotesRes
+    |> required "error" string
+    |> required "payload" decodeNotesPayload
+
+decodeNotesPayload : Decoder (List Note)
+decodeNotesPayload =
+    list (
+        decode Note
+            |> required "cid" (int)
+            |> required "nid" (int)
+            |> required "cmod" (int)
+            |> required "nmod" (int)
+            |> required "mid" (int)
+            |> optional "tags" (string) ""
+            |> required "flds" (string)
+            |> required "sfld" (string)
+            |> required "did" (int)
+            |> required "ord" (int)
+            |> required "ttype" (int)
+            |> required "queue" (int)
+            |> required "due" (int)
+            |> required "reps" (int)
+            |> required "lapses" (int)
+    )
 
 decodeCollection : Decoder CollectionRes
 decodeCollection =
     decode CollectionRes
     |> required "error" string
-    |> required "payload" decodePayload
+    |> required "payload" decodeCollectionPayload
 
-decodePayload : Decoder Payload
-decodePayload =
-    decode Payload
+decodeCollectionPayload : Decoder Collection
+decodeCollectionPayload =
+    decode Collection
     |> required "collection" decodeACollection
     |> required "decks" decodeADecks
     |> required "models" decodeAModels
@@ -99,7 +150,7 @@ decodeACollection =
 
 decodeADecks : Decoder (List ADeck)
 decodeADecks =
-    Json.Decode.list (
+    list (
         decode ADeck
             |> required "did" int
             |> required "mod" int
@@ -108,7 +159,7 @@ decodeADecks =
 
 decodeAModels : Decoder (List AModel)
 decodeAModels =
-    Json.Decode.list (
+    list (
         decode AModel
             |> required "did" int
             |> required "flds" (list string)
@@ -119,11 +170,12 @@ decodeAModels =
 type Msg
     = FetchCollection
     | FetchedCollection (Result Http.Error CollectionRes)
+    | FetchNotes
+    | FetchedNotes (Result Http.Error NotesRes)
 
 view : Model -> Html Msg
 view model = div []
-    [ h1 [] [ text "Hello World" ]
-    , div [] [ text model.error ]
+    [ div [] [ text model.error ]
     , div [] (
         List.map (\deck ->
             div []
@@ -142,6 +194,7 @@ view model = div []
         )
         model.models
     )
+    , div [] [ text (toString model.notes) ]
     ]
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -157,9 +210,15 @@ update msg model =
                 , models = collectionRes.payload.models
                 , decks = collectionRes.payload.decks
                 }
-                , Cmd.none
+                , fetchNotes
             )
         FetchedCollection (Err unknownErr) ->
+            ({ model | error = (toString unknownErr)}, Cmd.none )
+        FetchNotes ->
+            ( model, Cmd.none )
+        FetchedNotes (Ok notesRes) ->
+            ({ model | notes = notesRes.payload }, Cmd.none )
+        FetchedNotes (Err unknownErr) ->
             ({ model | error = (toString unknownErr)}, Cmd.none )
 
 subscriptions : Model -> Sub Msg
