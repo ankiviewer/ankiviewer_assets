@@ -45,8 +45,8 @@ type alias Note =
     , nmod : Int
     , mid : Int
     , tags : String
-    , flds : String
-    , sfld : String
+    , one : String
+    , two : String
     , did : Int
     , ord : Int
     , ttype : Int
@@ -117,8 +117,8 @@ decodeNotesPayload =
             |> required "nmod" (int)
             |> required "mid" (int)
             |> optional "tags" (string) ""
-            |> required "flds" (string)
-            |> required "sfld" (string)
+            |> required "one" (string)
+            |> required "two" (string)
             |> required "did" (int)
             |> required "ord" (int)
             |> required "ttype" (int)
