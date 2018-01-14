@@ -30,7 +30,11 @@ function watch() {
   elif [[ $1 = "css" ]];then
     sass --watch css/main.scss:$AV_WEB_STATIC_DIR/css/app.css
   elif [[ $1 = "elm" ]];then
-    node_modules/.bin/elm-live elm/Home.elm --pushstate --output "$AV_WEB_STATIC_DIR/js/elm.js" --yes
+    if [[ $FILE = "" ]];then
+      echo "you need to run your elm watch command with exporting a \$FILE, e.g. FILE=\"elm/Search.elm\""
+    else
+      node_modules/.bin/elm-live "$FILE" --pushstate --output "$AV_WEB_STATIC_DIR/js/elm.js" --yes
+    fi
   elif [[ $1 = "js" ]];then
     ./node_modules/.bin/rollup -c rollup.config.js -w
   else
