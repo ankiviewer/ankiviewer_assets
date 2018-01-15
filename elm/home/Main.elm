@@ -9,6 +9,7 @@ import Date exposing (..)
 import Time exposing (Time)
 import Spinner exposing (spinner)
 import Model exposing (Model)
+import Msg exposing (..)
 
 main : Program Never Model Msg
 main
@@ -29,12 +30,6 @@ fetchDeck =
       Http.get "/api/deck" decodeData
   in
      Http.send Deck request
-
-type Msg
-  = FetchDeck
-  | Deck (Result Http.Error Int)
-  | Sync
-  | SyncMessage String
 
 view : Model -> Html Msg
 view model = div []
