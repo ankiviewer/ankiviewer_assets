@@ -14,7 +14,8 @@ function build() {
   elif [[ $1 = "elm" ]];then
     for dir in $ELM_DIRS;do
       cd $dir
-      export ELM_COMMAND="$BUILD_ROOT/node_modules/.bin/elm make Main.elm --output $AV_WEB_STATIC_DIR/js/elm.js --yes"
+      jsfilename="$AV_WEB_STATIC_DIR/js/elm-$(echo $dir | sed 's/elm\///g').js"
+      ELM_COMMAND="$BUILD_ROOT/node_modules/.bin/elm make Main.elm --output $jsfilename --yes"
       if [[ $TRAVIS = true ]]; then
         bash -c "$TRAVIS_BUILD_DIR/sysocnfcpus/bin/sysocnfcpus -n 2 $ELM_COMMAND"
       else
