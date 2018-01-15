@@ -7,14 +7,16 @@ import View exposing (view)
 import Update exposing (update)
 import Api exposing (fetchCollection)
 
+
 main : Program Never Model Msg
-main
-    = Html.program
-    { init = init
-    , view = view
-    , update = update
-    , subscriptions = \_ -> Sub.none
-    }
+main =
+    Html.program
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = \_ -> Sub.none
+        }
+
 
 init : ( Model, Cmd Msg )
 init =

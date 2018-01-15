@@ -7,6 +7,7 @@ import Http
 import Model exposing (..)
 import Msg exposing (..)
 
+
 fetchCollection : Cmd Msg
 fetchCollection =
     let
@@ -15,24 +16,27 @@ fetchCollection =
     in
         Http.send FetchedCollection request
 
+
 fetchNotes : Cmd Msg
 fetchNotes =
     let
         request =
             Http.get "/api/notes" decodeNotes
     in
-       Http.send FetchedNotes request
+        Http.send FetchedNotes request
+
 
 decodeNotes : Decoder NotesRes
 decodeNotes =
     decode NotesRes
-    |> required "error" string
-    |> required "payload" decodeNotesPayload
+        |> required "error" string
+        |> required "payload" decodeNotesPayload
+
 
 decodeNotesPayload : Decoder (List Note)
 decodeNotesPayload =
-    list (
-        decode Note
+    list
+        (decode Note
             |> required "cid" (int)
             |> required "nid" (int)
             |> required "cmod" (int)
@@ -48,44 +52,48 @@ decodeNotesPayload =
             |> required "due" (int)
             |> required "reps" (int)
             |> required "lapses" (int)
-    )
+        )
+
 
 decodeCollection : Decoder CollectionRes
 decodeCollection =
     decode CollectionRes
-    |> required "error" string
-    |> required "payload" decodeCollectionPayload
+        |> required "error" string
+        |> required "payload" decodeCollectionPayload
+
 
 decodeCollectionPayload : Decoder Collection
 decodeCollectionPayload =
     decode Collection
-    |> required "collection" decodeACollection
-    |> required "decks" decodeADecks
-    |> required "models" decodeAModels
+        |> required "collection" decodeACollection
+        |> required "decks" decodeADecks
+        |> required "models" decodeAModels
+
 
 decodeACollection : Json.Decode.Decoder ACollection
 decodeACollection =
     decode ACollection
-    |> required "crt" int
-    |> required "mod" int
-    |> required "tags" (list string)
+        |> required "crt" int
+        |> required "mod" int
+        |> required "tags" (list string)
+
 
 decodeADecks : Decoder (List ADeck)
 decodeADecks =
-    list (
-        decode ADeck
+    list
+        (decode ADeck
             |> required "did" int
             |> required "mod" int
             |> required "name" string
-    )
+        )
+
 
 decodeAModels : Decoder (List AModel)
 decodeAModels =
-    list (
-        decode AModel
+    list
+        (decode AModel
             |> required "did" int
             |> required "flds" (list string)
             |> required "mid" int
             |> required "mod" int
-    )
-
+        )

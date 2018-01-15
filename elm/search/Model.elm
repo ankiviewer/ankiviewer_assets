@@ -1,5 +1,6 @@
 module Model exposing (..)
 
+
 type alias Model =
     { collection : ACollection
     , decks : List ADeck
@@ -8,15 +9,18 @@ type alias Model =
     , error : String
     }
 
+
 type alias CollectionRes =
     { error : String
     , payload : Collection
     }
 
+
 type alias NotesRes =
-    { error: String
+    { error : String
     , payload : List Note
     }
+
 
 type alias Note =
     { cid : Int
@@ -36,11 +40,13 @@ type alias Note =
     , lapses : Int
     }
 
+
 type alias Collection =
     { collection : ACollection
     , decks : List ADeck
     , models : List AModel
     }
+
 
 type alias ACollection =
     { crt : Int
@@ -48,11 +54,13 @@ type alias ACollection =
     , tags : List String
     }
 
+
 type alias ADeck =
     { did : Int
     , mod : Int
     , name : String
     }
+
 
 type alias AModel =
     { did : Int
@@ -60,6 +68,7 @@ type alias AModel =
     , mid : Int
     , mod : Int
     }
+
 
 initialModel : Model
 initialModel =
