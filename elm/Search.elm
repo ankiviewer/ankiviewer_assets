@@ -1,7 +1,7 @@
 module Search exposing (..)
 
 import Html exposing (Html, Attribute, div, input, text, h1)
-import Html.Attributes exposing (src)
+import Html.Attributes exposing (src, class)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode
@@ -176,6 +176,7 @@ type Msg
 view : Model -> Html Msg
 view model = div []
     [ div [] [ text model.error ]
+    , (tags model.collection.tags)
     , div [] (
         List.map (\deck ->
             div []
@@ -196,6 +197,15 @@ view model = div []
     )
     , div [] [ text (toString model.notes) ]
     ]
+
+tags : List String -> Html Msg
+tags ts = div []
+    (
+        List.map(\t ->
+            div [ class "b--red ba br2 ph2 pv1 lh-tag dib mb1 pointer montserrat mr1 bg-light-red hover-red"] [ text t ]
+        )
+        ts
+    )
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
