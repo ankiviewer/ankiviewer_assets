@@ -1,8 +1,8 @@
 #!/bin/bash
 
-export AV_WEB_STATIC_DIR=../av_umbrella/apps/av_web/priv/static
-export ELM_FILES="$(ls elm | awk '{print "elm/"$0}' | xargs)"
-export ELM_COMMAND="node_modules/.bin/elm make $ELM_FILES --output $AV_WEB_STATIC_DIR/js/elm.js --yes"
+export BUILD_ROOT="$(pwd)"
+export AV_WEB_STATIC_DIR="$BUILD_ROOT/../av_umbrella/apps/av_web/priv/static"
+export ELM_DIRS="$(find elm -type f -not -path "*/elm-stuff/*" | grep Main\.elm | sed 's/\/Main\.elm$//g' | xargs)"
 
 function build() {
   if [[ $1 = "static" ]];then
@@ -12,11 +12,16 @@ function build() {
   elif [[ $1 = "css" ]];then
     sass css/main.scss:$AV_WEB_STATIC_DIR/css/app.css
   elif [[ $1 = "elm" ]];then
-    if [[ $TRAVIS = true ]]; then
-      bash -c "$TRAVIS_BUILD_DIR/sysocnfcpus/bin/sysocnfcpus -n 2 $ELM_COMMAND"
-    else
-      bash -c "$ELM_COMMAND"
-    fi
+    for dir in $ELM_DIRS;do
+      cd $dir
+      export ELM_COMMAND="$BUILD_ROOT/node_modules/.bin/elm make Main.elm --output $AV_WEB_STATIC_DIR/js/elm.js --yes"
+      if [[ $TRAVIS = true ]]; then
+        bash -c "$TRAVIS_BUILD_DIR/sysocnfcpus/bin/sysocnfcpus -n 2 $ELM_COMMAND"
+      else
+        bash -c "$ELM_COMMAND"
+      fi
+      cd $BUILD_ROOT
+    done
   elif [[ $1 = "js" ]];then
     node_modules/.bin/rollup -c rollup.config.js
   else
@@ -30,10 +35,11 @@ function watch() {
   elif [[ $1 = "css" ]];then
     sass --watch css/main.scss:$AV_WEB_STATIC_DIR/css/app.css
   elif [[ $1 = "elm" ]];then
-    if [[ $FILE = "" ]];then
-      echo "you need to run your elm watch command with exporting a \$FILE, e.g. FILE=\"elm/Search.elm\""
+    if [[ $ELMAPP = "" ]];then
+      echo "you need to run your elm watch command with exporting a \$ELMAPP, e.g. ELMAPP=\"search\""
     else
-      node_modules/.bin/elm-live "$FILE" --pushstate --output "$AV_WEB_STATIC_DIR/js/elm.js" --yes
+      cd elm/$ELMAPP
+      $BUILD_ROOT/node_modules/.bin/elm-live "Main.elm" --pushstate --output "$AV_WEB_STATIC_DIR/js/elm.js" --yes
     fi
   elif [[ $1 = "js" ]];then
     ./node_modules/.bin/rollup -c rollup.config.js -w

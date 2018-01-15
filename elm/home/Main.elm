@@ -8,6 +8,7 @@ import Json.Decode as Decode
 import Date exposing (..)
 import Time exposing (Time)
 import Spinner exposing (spinner)
+import Model exposing (Model)
 
 main : Program Never Model Msg
 main
@@ -16,13 +17,6 @@ main
   , view = view
   , update = update
   , subscriptions = subscriptions
-  }
-
-type alias Model =
-  { updatedAt : String
-  , syncHappening: Bool
-  , syncMessage : String
-  , error : String
   }
 
 init : ( Model, Cmd Msg )
