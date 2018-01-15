@@ -60,3 +60,7 @@ type alias AModel =
     , mid : Int
     , mod : Int
     }
+
+initialModel : Model
+initialModel =
+    Model (ACollection 0 0 []) [] [] [] ""
