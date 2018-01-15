@@ -1,4 +1,4 @@
-module Model exposing (Model)
+module Model exposing (Model, initialModel)
 
 type alias Model =
   { updatedAt : String
@@ -7,3 +7,5 @@ type alias Model =
   , error : String
   }
 
+initialModel : Model
+initialModel = Model "" False "" ""
