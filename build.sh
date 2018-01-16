@@ -40,7 +40,7 @@ function watch() {
       echo "you need to run your elm watch command with exporting a \$ELMAPP, e.g. ELMAPP=\"search\""
     else
       cd elm/$ELMAPP
-      $BUILD_ROOT/node_modules/.bin/elm-live "Main.elm" --pushstate --output "$AV_WEB_STATIC_DIR/js/elm.js" --yes
+      $BUILD_ROOT/node_modules/.bin/elm-live "Main.elm" --pushstate --output "$AV_WEB_STATIC_DIR/js/elm-$ELMAPP.js" --yes
     fi
   elif [[ $1 = "js" ]];then
     ./node_modules/.bin/rollup -c rollup.config.js -w
