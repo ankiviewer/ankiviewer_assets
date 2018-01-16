@@ -96,4 +96,5 @@ decodeAModels =
             |> required "flds" (list string)
             |> required "mid" int
             |> required "mod" int
+            |> required "name" string
         )

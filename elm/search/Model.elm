@@ -67,6 +67,7 @@ type alias AModel =
     , flds : List String
     , mid : Int
     , mod : Int
+    , name : String
     }
 
 
