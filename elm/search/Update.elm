@@ -4,22 +4,68 @@ import Msg exposing (..)
 import Model exposing (..)
 import Api exposing (fetchNotes)
 
+handleTags : List String -> List Tag
+handleTags tags =
+    List.map(
+        \t ->
+            Tag t True
+    )
+    tags
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+handleModels : List ModelRes -> List Model
+handleModels models =
+    List.map(
+        \m ->
+            let
+                {did, flds, mid, mod, name} = m
+            in
+                { did = did
+                , flds = flds
+                , mid = mid
+                , mod = mod
+                , name = name
+                , showing = True
+                }
+    )
+    models
+
+handleDecks : List DeckRes -> List Deck
+handleDecks decks =
+    List.map(
+        \d ->
+            let
+                {did, mod, name} = d
+            in
+               { did = did
+               , mod = mod
+               , name = name
+               , showing = True
+               }
+    )
+    decks
+
+
+update : Msg -> SearchModel -> ( SearchModel, Cmd Msg )
 update msg model =
     case msg of
         FetchCollection ->
             ( model, Cmd.none )
 
         FetchedCollection (Ok collectionRes) ->
-            ( { model
-                | error = collectionRes.error
-                , collection = collectionRes.payload.collection
-                , models = collectionRes.payload.models
-                , decks = collectionRes.payload.decks
-              }
-            , fetchNotes
-            )
+            let
+                { error, payload } = collectionRes
+                { tagsAndCrt, models, decks } = payload
+                { crt, tags } = tagsAndCrt
+            in
+              ( { model
+                  | error = error
+                  , crt = crt
+                  , tags = (handleTags tags)
+                  , models = (handleModels models)
+                  , decks = (handleDecks decks)
+                }
+              , fetchNotes
+              )
 
         FetchedCollection (Err unknownErr) ->
             ( { model | error = (toString unknownErr) }, Cmd.none )

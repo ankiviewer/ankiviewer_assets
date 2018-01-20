@@ -1,14 +1,14 @@
 module Search exposing (..)
 
 import Html
-import Model exposing (Model, initialModel)
+import Model exposing (SearchModel, initialModel)
 import Msg exposing (Msg)
 import View exposing (view)
 import Update exposing (update)
 import Api exposing (fetchCollection)
 
 
-main : Program Never Model Msg
+main : Program Never SearchModel Msg
 main =
     Html.program
         { init = init
@@ -18,6 +18,6 @@ main =
         }
 
 
-init : ( Model, Cmd Msg )
+init : ( SearchModel, Cmd Msg )
 init =
     ( initialModel, fetchCollection )

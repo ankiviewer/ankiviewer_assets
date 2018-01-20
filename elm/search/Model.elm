@@ -1,18 +1,78 @@
 module Model exposing (..)
 
 
-type alias Model =
-    { collection : ACollection
-    , decks : List ADeck
-    , models : List AModel
+type alias SearchModel =
+    { crt : Int
+    , tags : List Tag
+    , search : String
+    , filters : List Filter
+    , decks : List Deck
+    , models : List Model
+    , columns : List String
     , notes : List Note
     , error : String
     }
 
 
+initialModel : SearchModel
+initialModel =
+    SearchModel
+        0
+        []
+        ""
+        initialFilters
+        []
+        []
+        [ "front", "back", "tags" ]
+        []
+        ""
+
+initialFilters : List Filter
+initialFilters =
+        [ (Filter "tags" True)
+        , (Filter "decks" True)
+        , (Filter "models" True)
+        ]
+
+
+type alias Filter =
+    { name : String
+    , showing : Bool
+    }
+
+
 type alias CollectionRes =
     { error : String
-    , payload : Collection
+    , payload : CollectionPayloadRes
+    }
+
+type alias CollectionPayloadRes =
+    { tagsAndCrt : TagsAndCrtRes
+    , decks : List DeckRes
+    , models : List ModelRes
+    }
+
+type alias TagsAndCrtRes =
+    { crt : Int
+    , tags : List String
+    }
+
+
+type alias TagsAndCrt =
+    { crt : Int
+    , tags : List Tag
+    , showing : Bool
+    }
+
+type alias Tag =
+    { name : String
+    , showing : Bool
+    }
+
+type alias Collection =
+    { tagsAndCrt : TagsAndCrt
+    , decks : List Deck
+    , models : List Model
     }
 
 
@@ -29,8 +89,8 @@ type alias Note =
     , nmod : Int
     , mid : Int
     , tags : String
-    , one : String
-    , two : String
+    , front : String
+    , back : String
     , did : Int
     , ord : Int
     , ttype : Int
@@ -41,36 +101,34 @@ type alias Note =
     }
 
 
-type alias Collection =
-    { collection : ACollection
-    , decks : List ADeck
-    , models : List AModel
-    }
-
-
-type alias ACollection =
-    { crt : Int
+type alias Deck =
+    { did : Int
     , mod : Int
-    , tags : List String
+    , name : String
+    , showing : Bool
     }
 
 
-type alias ADeck =
+type alias Model =
+    { did : Int
+    , flds : List String
+    , mid : Int
+    , mod : Int
+    , name : String
+    , showing : Bool
+    }
+
+type alias DeckRes =
     { did : Int
     , mod : Int
     , name : String
     }
 
 
-type alias AModel =
+type alias ModelRes =
     { did : Int
     , flds : List String
     , mid : Int
     , mod : Int
     , name : String
     }
-
-
-initialModel : Model
-initialModel =
-    Model (ACollection 0 0 []) [] [] [] ""

@@ -1,7 +1,7 @@
 module Api exposing (fetchCollection, fetchNotes)
 
 import Json.Decode as Decode
-import Json.Decode exposing (list, int, string, Decoder)
+import Json.Decode exposing (list, int, string, bool, Decoder)
 import Json.Decode.Pipeline exposing (decode, required, optional)
 import Http
 import Model exposing (..)
@@ -43,8 +43,8 @@ decodeNotesPayload =
             |> required "nmod" (int)
             |> required "mid" (int)
             |> optional "tags" (string) ""
-            |> required "one" (string)
-            |> required "two" (string)
+            |> required "front" (string)
+            |> required "back" (string)
             |> required "did" (int)
             |> required "ord" (int)
             |> required "ttype" (int)
@@ -59,39 +59,38 @@ decodeCollection : Decoder CollectionRes
 decodeCollection =
     decode CollectionRes
         |> required "error" string
-        |> required "payload" decodeCollectionPayload
+        |> required "payload" decodeCollectionPayloadRes
 
 
-decodeCollectionPayload : Decoder Collection
-decodeCollectionPayload =
-    decode Collection
-        |> required "collection" decodeACollection
-        |> required "decks" decodeADecks
-        |> required "models" decodeAModels
+decodeCollectionPayloadRes : Decoder CollectionPayloadRes
+decodeCollectionPayloadRes =
+    decode CollectionPayloadRes
+        |> required "collection" decodeTagsAndCrt
+        |> required "decks" decodeDecks
+        |> required "models" decodeModels
 
 
-decodeACollection : Json.Decode.Decoder ACollection
-decodeACollection =
-    decode ACollection
+decodeTagsAndCrt : Json.Decode.Decoder TagsAndCrtRes
+decodeTagsAndCrt =
+    decode TagsAndCrtRes
         |> required "crt" int
-        |> required "mod" int
         |> required "tags" (list string)
 
 
-decodeADecks : Decoder (List ADeck)
-decodeADecks =
+decodeDecks : Decoder (List DeckRes)
+decodeDecks =
     list
-        (decode ADeck
+        (decode DeckRes
             |> required "did" int
             |> required "mod" int
             |> required "name" string
         )
 
 
-decodeAModels : Decoder (List AModel)
-decodeAModels =
+decodeModels : Decoder (List ModelRes)
+decodeModels =
     list
-        (decode AModel
+        (decode ModelRes
             |> required "did" int
             |> required "flds" (list string)
             |> required "mid" int

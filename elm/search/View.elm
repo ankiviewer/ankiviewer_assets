@@ -6,16 +6,15 @@ import Msg exposing (..)
 import Model exposing (..)
 
 
-view : Model -> Html Msg
+view : SearchModel -> Html Msg
 view model =
     div []
         [ div [] [ text model.error ]
-        , (tags model.collection.tags)
+        , (filters model.filters)
+        , (tags model.tags)
         , (decks model.decks)
         , (models model.models)
         , (notes model.notes)
-
-        -- , div [] [ text (toString model.notes) ]
         ]
 
 
@@ -24,18 +23,32 @@ c =
     "b--red ba br2 ph2 pv1 lh-tag dib mb1 pointer montserrat mr1 bg-light-red hover-red"
 
 
-tags : List String -> Html Msg
-tags ts =
+filters : List Filter -> Html Msg
+filters fs =
     div []
         (List.map
-            (\t ->
-                div [ class c ] [ text t ]
+            (\f ->
+                div [] [ text f.name ]
             )
-            ts
+            fs
         )
 
 
-decks : List ADeck -> Html Msg
+tags : List Tag -> Html Msg
+tags ts =
+    div []
+        [ div [] [ text "tags:" ]
+        , div []
+            (List.map
+                (\t ->
+                    div [ class c ] [ text t.name ]
+                )
+                ts
+            )
+        ]
+
+
+decks : List Deck -> Html Msg
 decks ds =
     div []
         (List.map
@@ -46,7 +59,7 @@ decks ds =
         )
 
 
-models : List AModel -> Html Msg
+models : List Model -> Html Msg
 models ms =
     div []
         (List.map
@@ -59,7 +72,7 @@ models ms =
 
 myList : List String
 myList =
-    [ "one", "two", "tags" ]
+    [ "front", "back", "tags" ]
 
 
 noteMapper : List String -> List Note -> List (List String)
@@ -72,8 +85,6 @@ noteHeadersMapper nheads n acc =
     case nheads of
         [] ->
             []
-
-        -- shouldn't reach here
         [ head ] ->
             acc ++ (extractNoteField n head)
 
@@ -84,11 +95,11 @@ noteHeadersMapper nheads n acc =
 extractNoteField : Note -> String -> List String
 extractNoteField n header =
     case header of
-        "one" ->
-            [ n.one ]
+        "front" ->
+            [ n.front ]
 
-        "two" ->
-            [ n.two ]
+        "back" ->
+            [ n.back ]
 
         "tags" ->
             [ n.tags ]
