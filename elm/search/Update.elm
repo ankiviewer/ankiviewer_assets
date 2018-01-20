@@ -5,6 +5,34 @@ import Model exposing (..)
 import Api exposing (fetchNotes)
 
 
+handleFilters : String -> Filters -> Filters
+handleFilters name { tags, decks, models } =
+    case name of
+        "tags" ->
+            Filters (not tags) decks models
+
+        "decks" ->
+            Filters tags (not decks) models
+
+        "models" ->
+            Filters tags decks (not models)
+
+        _ ->
+            Filters tags decks models
+
+
+handleTdmToggle : String -> List (Tdm a) -> List (Tdm a)
+handleTdmToggle name tdms =
+    List.map
+        (\tdm ->
+            if tdm.name == name then
+                { tdm | showing = not tdm.showing }
+            else
+                tdm
+        )
+        tdms
+
+
 handleTags : List String -> List Tag
 handleTags tags =
     List.map
@@ -17,18 +45,8 @@ handleTags tags =
 handleModels : List ModelRes -> List Model
 handleModels models =
     List.map
-        (\m ->
-            let
-                { did, flds, mid, mod, name } =
-                    m
-            in
-                { did = did
-                , flds = flds
-                , mid = mid
-                , mod = mod
-                , name = name
-                , showing = True
-                }
+        (\{ did, flds, mid, mod, name } ->
+            Model did flds mid mod name True
         )
         models
 
@@ -36,16 +54,8 @@ handleModels models =
 handleDecks : List DeckRes -> List Deck
 handleDecks decks =
     List.map
-        (\d ->
-            let
-                { did, mod, name } =
-                    d
-            in
-                { did = did
-                , mod = mod
-                , name = name
-                , showing = True
-                }
+        (\{ did, mod, name } ->
+            Deck did mod name True
         )
         decks
 
@@ -94,84 +104,28 @@ update msg model =
 
         ToggleFilter name ->
             let
-                { tags, decks, models } =
-                    model.filters
+                filters =
+                    handleFilters name model.filters
             in
-                case name of
-                    "tags" ->
-                        let
-                            filters =
-                                { tags = not tags
-                                , decks = decks
-                                , models = models
-                                }
-                        in
-                            ( { model | filters = filters }, Cmd.none )
-
-                    "decks" ->
-                        let
-                            filters =
-                                { tags = tags
-                                , decks = not decks
-                                , models = models
-                                }
-                        in
-                            ( { model | filters = filters }, Cmd.none )
-
-                    "models" ->
-                        let
-                            filters =
-                                { tags = tags
-                                , decks = decks
-                                , models = not models
-                                }
-                        in
-                            ( { model | filters = filters }, Cmd.none )
-
-                    _ ->
-                        ( model, Cmd.none )
+                ( { model | filters = filters }, Cmd.none )
 
         ToggleTag name ->
             let
                 tags =
-                    (List.map
-                        (\t ->
-                            if t.name == name then
-                                { t | showing = not t.showing }
-                            else
-                                t
-                        )
-                        model.tags
-                    )
+                    handleTdmToggle name model.tags
             in
                 ( { model | tags = tags }, Cmd.none )
 
         ToggleDeck name ->
             let
                 decks =
-                    (List.map
-                        (\d ->
-                            if d.name == name then
-                                { d | showing = not d.showing }
-                            else
-                                d
-                        )
-                        model.decks
-                    )
+                    handleTdmToggle name model.decks
             in
                 ( { model | decks = decks }, Cmd.none )
 
         ToggleModel name ->
             let
                 models =
-                    (List.map
-                        (\m ->
-                            if m.name == name then
-                                { m | showing = not m.showing }
-                            else
-                                m
-                        )
-                        model.models
-                    )
+                    handleTdmToggle name model.models
             in
                 ( { model | models = models }, Cmd.none )

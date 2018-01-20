@@ -35,6 +35,13 @@ type alias Filters =
     }
 
 
+type alias Tdm a =
+    { a
+        | name : String
+        , showing : Bool
+    }
+
+
 type alias Tag =
     { name : String
     , showing : Bool
