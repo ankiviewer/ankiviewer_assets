@@ -9,3 +9,8 @@ type Msg
     | FetchedCollection (Result Http.Error CollectionRes)
     | FetchNotes
     | FetchedNotes (Result Http.Error NotesRes)
+    | Search String
+    | ToggleFilter String
+    | ToggleTag String
+    | ToggleDeck String
+    | ToggleModel String

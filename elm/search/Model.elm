@@ -5,7 +5,7 @@ type alias SearchModel =
     { crt : Int
     , tags : List Tag
     , search : String
-    , filters : List Filter
+    , filters : Filters
     , decks : List Deck
     , models : List Model
     , columns : List String
@@ -27,17 +27,19 @@ initialModel =
         []
         ""
 
-initialFilters : List Filter
+
+initialFilters : Filters
 initialFilters =
-        [ (Filter "tags" True)
-        , (Filter "decks" True)
-        , (Filter "models" True)
-        ]
+    { tags = True
+    , decks = True
+    , models = True
+    }
 
 
-type alias Filter =
-    { name : String
-    , showing : Bool
+type alias Filters =
+    { tags : Bool
+    , decks : Bool
+    , models : Bool
     }
 
 
@@ -46,11 +48,13 @@ type alias CollectionRes =
     , payload : CollectionPayloadRes
     }
 
+
 type alias CollectionPayloadRes =
     { tagsAndCrt : TagsAndCrtRes
     , decks : List DeckRes
     , models : List ModelRes
     }
+
 
 type alias TagsAndCrtRes =
     { crt : Int
@@ -61,13 +65,14 @@ type alias TagsAndCrtRes =
 type alias TagsAndCrt =
     { crt : Int
     , tags : List Tag
-    , showing : Bool
     }
+
 
 type alias Tag =
     { name : String
     , showing : Bool
     }
+
 
 type alias Collection =
     { tagsAndCrt : TagsAndCrt
@@ -117,6 +122,7 @@ type alias Model =
     , name : String
     , showing : Bool
     }
+
 
 type alias DeckRes =
     { did : Int
