@@ -20,7 +20,7 @@ view model =
         [ div [] [ text model.error ]
         , div [] [ text model.search ]
         , (search model.search)
-        , (filters model)
+        , (filters model.filters)
         , (tags model)
         , (decks model)
         , (models model)
@@ -43,57 +43,36 @@ search str =
     input [ placeholder "Search", onInput Search ] []
 
 
-filters : SearchModel -> Html Msg
-filters { filters } =
-    let
-        { tags, models, decks } =
-            filters
-    in
-        div []
-            [ div
-                [ class
-                    (if tags then
-                        c
-                     else
-                        cdim
-                    )
-                , (onClick (ToggleFilter "tags"))
-                ]
-                [ text "tags" ]
-            , div
-                [ class
-                    (if decks then
-                        c
-                     else
-                        cdim
-                    )
-                , (onClick (ToggleFilter "decks"))
-                ]
-                [ text "decks" ]
-            , div
-                [ class
-                    (if models then
-                        c
-                     else
-                        cdim
-                    )
-                , (onClick (ToggleFilter "models"))
-                ]
-                [ text "models" ]
-            ]
+filters : Filters -> Html Msg
+filters { tags, models, decks } =
+    div []
+        (List.map(
+            \(str, tdm) ->
+                div [ class
+                        (if tdm then
+                            c
+                         else
+                            cdim
+                        )
+                    , (onClick (ToggleFilter str))
+                    ]
+                    [ text str ]
+            )
+            [("tags", tags), ("decks", decks), ("models", models)]
+        )
 
 
-tags : SearchModel -> Html Msg
-tags { tags, filters } =
+tdm : (String -> Msg) -> String -> List (Tdm a) -> Bool -> Html Msg
+tdm msg str tdms filter =
     div
         [ class
-            (if filters.tags then
+            (if filter then
                 ""
              else
                 "dn"
             )
         ]
-        [ div [] [ text "tags:" ]
+        [ div [] [ text (str ++ ":") ]
         , div []
             (List.map
                 (\t ->
@@ -104,73 +83,28 @@ tags { tags, filters } =
                              else
                                 cdim
                             )
-                        , (onClick (ToggleTag t.name))
+                        , (onClick (msg t.name))
                         ]
                         [ text t.name ]
                 )
-                tags
+                tdms
             )
         ]
+
+
+tags : SearchModel -> Html Msg
+tags { tags, filters } =
+    tdm ToggleTag "tags" tags filters.tags
 
 
 decks : SearchModel -> Html Msg
 decks { decks, filters } =
-    div
-        [ class
-            (if filters.decks then
-                ""
-             else
-                "dn"
-            )
-        ]
-        [ div [] [ text "decks:" ]
-        , div []
-            (List.map
-                (\d ->
-                    div
-                        [ class
-                            (if d.showing then
-                                c
-                             else
-                                cdim
-                            )
-                        , (onClick (ToggleDeck d.name))
-                        ]
-                        [ text d.name ]
-                )
-                decks
-            )
-        ]
+    tdm ToggleDeck "decks" decks filters.decks
 
 
 models : SearchModel -> Html Msg
 models { models, filters } =
-    div
-        [ class
-            (if filters.models then
-                ""
-             else
-                "dn"
-            )
-        ]
-        [ div [] [ text "models:" ]
-        , div []
-            (List.map
-                (\m ->
-                    div
-                        [ class
-                            (if m.showing then
-                                c
-                             else
-                                cdim
-                            )
-                        , (onClick (ToggleModel m.name))
-                        ]
-                        [ text m.name ]
-                )
-                models
-            )
-        ]
+    tdm ToggleModel "models" models filters.models
 
 
 noteMapper : List String -> List Note -> List (List String)
