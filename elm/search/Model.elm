@@ -20,7 +20,7 @@ initialModel =
         0
         []
         ""
-        initialFilters
+        (Filters True True True)
         []
         []
         [ "front", "back", "tags" ]
@@ -28,43 +28,10 @@ initialModel =
         ""
 
 
-initialFilters : Filters
-initialFilters =
-    { tags = True
-    , decks = True
-    , models = True
-    }
-
-
 type alias Filters =
     { tags : Bool
     , decks : Bool
     , models : Bool
-    }
-
-
-type alias CollectionRes =
-    { error : String
-    , payload : CollectionPayloadRes
-    }
-
-
-type alias CollectionPayloadRes =
-    { tagsAndCrt : TagsAndCrtRes
-    , decks : List DeckRes
-    , models : List ModelRes
-    }
-
-
-type alias TagsAndCrtRes =
-    { crt : Int
-    , tags : List String
-    }
-
-
-type alias TagsAndCrt =
-    { crt : Int
-    , tags : List Tag
     }
 
 
@@ -75,15 +42,9 @@ type alias Tag =
 
 
 type alias Collection =
-    { tagsAndCrt : TagsAndCrt
+    { tagsAndCrt : { crt : Int, tags : List Tag }
     , decks : List Deck
     , models : List Model
-    }
-
-
-type alias NotesRes =
-    { error : String
-    , payload : List Note
     }
 
 
@@ -137,4 +98,29 @@ type alias ModelRes =
     , mid : Int
     , mod : Int
     , name : String
+    }
+
+
+type alias CollectionRes =
+    { error : String
+    , payload : CollectionPayloadRes
+    }
+
+
+type alias CollectionPayloadRes =
+    { tagsAndCrt : TagsAndCrtRes
+    , decks : List DeckRes
+    , models : List ModelRes
+    }
+
+
+type alias TagsAndCrtRes =
+    { crt : Int
+    , tags : List String
+    }
+
+
+type alias NotesRes =
+    { error : String
+    , payload : List Note
     }
