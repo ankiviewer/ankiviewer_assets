@@ -6,19 +6,21 @@ import Api exposing (fetchNotes)
 
 
 handleFilters : String -> Filters -> Filters
-handleFilters name { tags, decks, models } =
+handleFilters name { tags, decks, models, columns } =
     case name of
         "tags" ->
-            Filters (not tags) decks models
+            Filters (not tags) decks models columns
 
         "decks" ->
-            Filters tags (not decks) models
+            Filters tags (not decks) models columns
 
         "models" ->
-            Filters tags decks (not models)
+            Filters tags decks (not models) columns
 
+        "columns" ->
+            Filters tags decks models (not columns)
         _ ->
-            Filters tags decks models
+            Filters tags decks models columns
 
 
 handleTdmToggle : String -> List (Tdm a) -> List (Tdm a)
@@ -129,3 +131,10 @@ update msg model =
                     handleTdmToggle name model.models
             in
                 ( { model | models = models }, Cmd.none )
+
+        ToggleColumn name ->
+            let
+                columns =
+                    handleTdmToggle name model.columns
+            in
+                ( { model | columns = columns }, Cmd.none )

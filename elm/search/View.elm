@@ -7,13 +7,6 @@ import Msg exposing (..)
 import Model exposing (..)
 
 
--- TODO: Add card, ord?
-
-
-columns =
-    [ "front", "back", "tags", "reps", "lapses", "type", "queue", "due" ]
-
-
 view : SearchModel -> Html Msg
 view model =
     div []
@@ -24,6 +17,7 @@ view model =
         , (tags model)
         , (decks model)
         , (models model)
+        , (columns model)
         , (notes model)
         ]
 
@@ -44,7 +38,7 @@ search str =
 
 
 filters : Filters -> Html Msg
-filters { tags, models, decks } =
+filters { tags, models, decks, columns } =
     div []
         (List.map(
             \(str, tdm) ->
@@ -58,7 +52,11 @@ filters { tags, models, decks } =
                     ]
                     [ text str ]
             )
-            [("tags", tags), ("decks", decks), ("models", models)]
+            [ ("tags", tags)
+            , ("decks", decks)
+            , ("models", models)
+            , ("columns", columns)
+            ]
         )
 
 
@@ -106,13 +104,16 @@ models : SearchModel -> Html Msg
 models { models, filters } =
     tdm ToggleModel "models" models filters.models
 
+columns : SearchModel -> Html Msg
+columns { columns, filters } =
+    tdm ToggleColumn "columns" columns filters.columns
 
-noteMapper : List String -> List Note -> List (List String)
+noteMapper : List Column -> List Note -> List (List String)
 noteMapper nheads ns =
     List.map (\n -> noteHeadersMapper nheads n []) ns
 
 
-noteHeadersMapper : List String -> Note -> List String -> List String
+noteHeadersMapper : List Column -> Note -> List String -> List String
 noteHeadersMapper nheads n acc =
     case nheads of
         [] ->
@@ -125,44 +126,50 @@ noteHeadersMapper nheads n acc =
             noteHeadersMapper tail n (acc ++ (extractNoteField n head))
 
 
-extractNoteField : Note -> String -> List String
-extractNoteField n header =
-    case header of
-        "front" ->
-            [ n.front ]
+extractNoteField : Note -> Column -> List String
+extractNoteField n {name, showing} =
+    if showing then
+        case name of
+            "front" ->
+                [ n.front ]
 
-        "back" ->
-            [ n.back ]
+            "back" ->
+                [ n.back ]
 
-        "tags" ->
-            [ n.tags ]
+            "tags" ->
+                [ n.tags ]
 
-        "reps" ->
-            [ toString n.reps ]
+            "reps" ->
+                [ toString n.reps ]
 
-        "lapses" ->
-            [ toString n.lapses ]
+            "lapses" ->
+                [ toString n.lapses ]
 
-        "type" ->
-            [ toString n.ttype ]
+            "type" ->
+                [ toString n.ttype ]
 
-        "queue" ->
-            [ toString n.queue ]
+            "queue" ->
+                [ toString n.queue ]
 
-        "due" ->
-            [ toString n.due ]
+            "due" ->
+                [ toString n.due ]
 
-        _ ->
-            [ "error!!!" ]
+            _ ->
+                [ "error!!!" ]
+    else
+        []
 
 
 notes : SearchModel -> Html Msg
 notes { columns, notes } =
     table []
         [ thead []
-            (List.map
-                (\h ->
-                    th [] [ text h ]
+            (List.filterMap
+                (\{name, showing} ->
+                    if showing then
+                        Just (th [] [ text name ])
+                    else
+                        Nothing
                 )
                 columns
             )

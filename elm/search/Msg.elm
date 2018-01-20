@@ -14,3 +14,4 @@ type Msg
     | ToggleTag String
     | ToggleDeck String
     | ToggleModel String
+    | ToggleColumn String

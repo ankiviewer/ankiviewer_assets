@@ -8,7 +8,7 @@ type alias SearchModel =
     , filters : Filters
     , decks : List Deck
     , models : List Model
-    , columns : List String
+    , columns : List Column
     , notes : List Note
     , error : String
     }
@@ -20,18 +20,31 @@ initialModel =
         0
         []
         ""
-        (Filters True True True)
+        (Filters True True True True)
         []
         []
-        [ "front", "back", "tags" ]
+        initialColumns
         []
         ""
+
+initialColumns : List Column
+initialColumns =
+    [ ( Column "front" True )
+    , ( Column "back" True )
+    , ( Column "tags" True )
+    , ( Column "reps" False )
+    , ( Column "lapses" False )
+    , ( Column "type" False )
+    , ( Column "queue" False )
+    , ( Column "due" False )
+    ]
 
 
 type alias Filters =
     { tags : Bool
     , decks : Bool
     , models : Bool
+    , columns : Bool
     }
 
 
@@ -43,6 +56,11 @@ type alias Tdm a =
 
 
 type alias Tag =
+    { name : String
+    , showing : Bool
+    }
+
+type alias Column =
     { name : String
     , showing : Bool
     }
