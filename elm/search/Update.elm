@@ -26,14 +26,21 @@ handleFilters name { tags, decks, models, columns } =
 
 handleTdmToggle : String -> List (Tdm a) -> List (Tdm a)
 handleTdmToggle name tdms =
-    List.map
-        (\tdm ->
-            if tdm.name == name then
-                { tdm | showing = not tdm.showing }
-            else
-                tdm
-        )
-        tdms
+    if name == "all" then
+        List.map
+            (\tdm ->
+                { tdm | showing = not (List.all (\t -> t.showing) tdms) }
+            )
+            tdms
+    else
+        List.map
+            (\tdm ->
+                if tdm.name == name then
+                    { tdm | showing = not tdm.showing }
+                else
+                    tdm
+            )
+            tdms
 
 
 handleTags : List String -> List Tag

@@ -73,7 +73,7 @@ tdm msg str tdms filter =
         ]
         [ div [] [ text (str ++ ":") ]
         , div []
-            (List.map
+            ((List.map
                 (\t ->
                     div
                         [ class
@@ -87,6 +87,18 @@ tdm msg str tdms filter =
                         [ text t.name ]
                 )
                 tdms
+             )
+                ++ [ div
+                        [ class
+                            (if List.all (\tdm -> tdm.showing) tdms then
+                                c
+                             else
+                                cdim
+                            )
+                        , (onClick (msg "all"))
+                        ]
+                        [ text "all" ]
+                   ]
             )
         ]
 
@@ -127,8 +139,8 @@ filterNote : Note -> SearchModel -> Bool
 filterNote n { search, tags, models, decks } =
     ((String.contains search n.front) || (String.contains search n.back))
         && (tags |> List.filter (\t -> t.showing) |> List.all (\t -> String.contains t.name n.tags))
-        && (decks |> List.filter (\d -> d.showing) |> List.all (\d -> n.did == d.did))
-        && (models |> List.filter (\m -> m.showing) |> List.all (\m -> n.mid == m.mid))
+        && (decks |> List.filter (\d -> d.showing) |> List.any (\d -> n.did == d.did))
+        && (models |> List.filter (\m -> m.showing) |> List.any (\m -> n.mid == m.mid))
 
 
 noteHeadersMapper : List Column -> Note -> List String -> List String
