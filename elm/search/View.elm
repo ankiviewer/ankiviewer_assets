@@ -17,6 +17,7 @@ view model =
         , (decks model)
         , (models model)
         , (columns model)
+        , div [] [ text ((model |> noteMapper |> List.length |> toString) ++ " Notes") ]
         , (notes model)
         ]
 
