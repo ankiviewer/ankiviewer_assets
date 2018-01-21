@@ -19,6 +19,7 @@ handleFilters name { tags, decks, models, columns } =
 
         "columns" ->
             Filters tags decks models (not columns)
+
         _ ->
             Filters tags decks models columns
 

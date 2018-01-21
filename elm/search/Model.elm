@@ -27,16 +27,17 @@ initialModel =
         []
         ""
 
+
 initialColumns : List Column
 initialColumns =
-    [ ( Column "front" True )
-    , ( Column "back" True )
-    , ( Column "tags" True )
-    , ( Column "reps" False )
-    , ( Column "lapses" False )
-    , ( Column "type" False )
-    , ( Column "queue" False )
-    , ( Column "due" False )
+    [ (Column "front" True)
+    , (Column "back" True)
+    , (Column "tags" True)
+    , (Column "reps" False)
+    , (Column "lapses" False)
+    , (Column "type" False)
+    , (Column "queue" False)
+    , (Column "due" False)
     ]
 
 
@@ -59,6 +60,7 @@ type alias Tag =
     { name : String
     , showing : Bool
     }
+
 
 type alias Column =
     { name : String

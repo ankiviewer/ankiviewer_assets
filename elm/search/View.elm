@@ -39,9 +39,10 @@ search str =
 filters : Filters -> Html Msg
 filters { tags, models, decks, columns } =
     div []
-        (List.map(
-            \(str, tdm) ->
-                div [ class
+        (List.map
+            (\( str, tdm ) ->
+                div
+                    [ class
                         (if tdm then
                             c
                          else
@@ -51,10 +52,10 @@ filters { tags, models, decks, columns } =
                     ]
                     [ text str ]
             )
-            [ ("tags", tags)
-            , ("decks", decks)
-            , ("models", models)
-            , ("columns", columns)
+            [ ( "tags", tags )
+            , ( "decks", decks )
+            , ( "models", models )
+            , ( "columns", columns )
             ]
         )
 
@@ -103,24 +104,31 @@ models : SearchModel -> Html Msg
 models { models, filters } =
     tdm ToggleModel "models" models filters.models
 
+
 columns : SearchModel -> Html Msg
 columns { columns, filters } =
     tdm ToggleColumn "columns" columns filters.columns
 
+
 noteMapper : SearchModel -> List (List String)
 noteMapper model =
-    List.filterMap (\n ->
-        if filterNote n model then
-            Just (noteHeadersMapper model.columns n [])
-        else
-            Nothing
-    )
-    model.notes
+    List.filterMap
+        (\n ->
+            if filterNote n model then
+                Just (noteHeadersMapper model.columns n [])
+            else
+                Nothing
+        )
+        model.notes
+
 
 filterNote : Note -> SearchModel -> Bool
-filterNote n {search, tags, models, decks} =
+filterNote n { search, tags, models, decks } =
     ((String.contains search n.front) || (String.contains search n.back))
-    && (tags |> List.filter(\t -> t.showing) |> List.all (\t -> String.contains t.name n.tags ))
+        && (tags |> List.filter (\t -> t.showing) |> List.all (\t -> String.contains t.name n.tags))
+        && (decks |> List.filter (\d -> d.showing) |> List.all (\d -> n.did == d.did))
+        && (models |> List.filter (\m -> m.showing) |> List.all (\m -> n.mid == m.mid))
+
 
 noteHeadersMapper : List Column -> Note -> List String -> List String
 noteHeadersMapper nheads n acc =
@@ -136,7 +144,7 @@ noteHeadersMapper nheads n acc =
 
 
 extractNoteField : Note -> Column -> List String
-extractNoteField n {name, showing} =
+extractNoteField n { name, showing } =
     if showing then
         case name of
             "front" ->
@@ -174,7 +182,7 @@ notes model =
     table []
         [ thead []
             (List.filterMap
-                (\{name, showing} ->
+                (\{ name, showing } ->
                     if showing then
                         Just (th [] [ text name ])
                     else
