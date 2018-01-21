@@ -11,7 +11,6 @@ view : SearchModel -> Html Msg
 view model =
     div []
         [ div [] [ text model.error ]
-        , div [] [ text model.search ]
         , (search model.search)
         , (filters model.filters)
         , (tags model)
@@ -108,10 +107,15 @@ columns : SearchModel -> Html Msg
 columns { columns, filters } =
     tdm ToggleColumn "columns" columns filters.columns
 
-noteMapper : List Column -> List Note -> List (List String)
-noteMapper nheads ns =
-    List.map (\n -> noteHeadersMapper nheads n []) ns
-
+noteMapper : String -> List Column -> List Note -> List (List String)
+noteMapper search nheads ns =
+    List.filterMap (\n ->
+        if (String.contains search n.front) || (String.contains search n.back) then
+            Just (noteHeadersMapper nheads n [])
+        else
+            Nothing
+    )
+    ns
 
 noteHeadersMapper : List Column -> Note -> List String -> List String
 noteHeadersMapper nheads n acc =
@@ -161,7 +165,7 @@ extractNoteField n {name, showing} =
 
 
 notes : SearchModel -> Html Msg
-notes { columns, notes } =
+notes { columns, notes, search } =
     table []
         [ thead []
             (List.filterMap
@@ -184,6 +188,6 @@ notes { columns, notes } =
                             nrow
                         )
                 )
-                (noteMapper columns notes)
+                (noteMapper search columns notes)
             )
         ]
