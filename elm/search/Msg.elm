@@ -15,3 +15,4 @@ type Msg
     | ToggleDeck String
     | ToggleModel String
     | ToggleColumn String
+    | ToggleFront (List String) Int

@@ -56,7 +56,7 @@ handleModels : List ModelRes -> List Model
 handleModels models =
     List.map
         (\{ did, flds, mid, mod, name } ->
-            Model did (List.map (\f -> Fld f False) flds) mid mod name True
+            Model did flds mid mod name True -1
         )
         models
 
@@ -146,3 +146,16 @@ update msg model =
                     handleTdmToggle name model.columns
             in
                 ( { model | columns = columns }, Cmd.none )
+        ToggleFront frontBack front ->
+            let
+                models =
+                    List.map
+                        (\m ->
+                            if (List.sort m.flds) == frontBack then
+                               { m | front = front }
+                           else
+                               m
+                        )
+                        model.models
+            in
+               ( { model | models = models }, Cmd.none )

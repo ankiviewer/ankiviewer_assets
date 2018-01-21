@@ -1,4 +1,4 @@
-module View exposing (view)
+module View exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (class, placeholder)
@@ -11,6 +11,7 @@ view : SearchModel -> Html Msg
 view model =
     div []
         [ div [] [ text model.error ]
+        , div [] [ text (toString model.models) ]
         , (search model.search)
         , (filters model.filters)
         , (tags model)
@@ -36,21 +37,88 @@ cdim =
 assignFrontBack : SearchModel -> Html Msg
 assignFrontBack model =
     div []
-        [ div [] [ text "front" ]
+        [ div [] [ text "front:" ]
         , div []
             (model.models
                 |> assignFrontBackFilter
                 |> List.map
-                    (\m ->
-                        div [] [ text (toString m.flds) ]
+                    (\{decks, frontBack, front} ->
+                        div []
+                            [ div [ class "dib" ]
+                                (
+                                    ( decks
+                                    |> List.map (\d -> div [ class "dib" ] [ text d ])
+                                    |> List.intersperse ( span [] [ text " and " ] )
+                                    ) ++ ( [ span [] [ text ": " ] ] )
+                                )
+                            , div [ class "dib" ]
+                                (
+                                    frontBack
+                                    |> List.indexedMap (\fi fb ->
+                                        div [ class "dib"
+                                            , onClick (ToggleFront frontBack (
+                                                    if front == fi then
+                                                       -1
+                                                    else
+                                                        fi
+                                                   )
+                                               )
+                                            ] [
+                                                text (
+                                                    if front == -1 then
+                                                       fb
+                                                   else if front == fi then
+                                                       "front=" ++ fb
+                                                   else
+                                                       "back=" ++ fb
+                                                )
+                                              ]
+                                    )
+                                    |> List.intersperse ( span [] [ text ", " ] )
+                                )   
+                            ]
                     )
             )
         ]
 
+type alias AssignFrontBack =
+    { decks : List String
+    , frontBack : List String
+    , front : Int
+    }
 
-assignFrontBackFilter : List Model -> List Model
+
+assignFrontBackFilter : List Model -> List AssignFrontBack
 assignFrontBackFilter models =
-    models
+    assignFrontBackFilterRecursive models []
+
+assignFrontBackFilterRecursive : List Model -> List AssignFrontBack -> List AssignFrontBack
+assignFrontBackFilterRecursive models acc =
+    case models of
+        [] ->
+            []
+        [ head ] ->
+            handleAssignFrontBackFilter head acc
+        head :: tail ->
+            acc
+            |> handleAssignFrontBackFilter head
+            |> assignFrontBackFilterRecursive tail
+
+handleAssignFrontBackFilter : Model -> List AssignFrontBack -> List AssignFrontBack
+handleAssignFrontBackFilter head acc =
+    if head.showing then
+        if List.any (\a -> a.frontBack == (List.sort head.flds)) acc then
+           List.map (\a ->
+               if a.frontBack == (List.sort head.flds) then
+                  { a | decks = ( head.name :: a.decks )}
+              else
+                  a
+           )
+           acc
+       else
+           { decks = [ head.name ], frontBack = (List.sort head.flds), front = head.front } :: acc
+   else
+       acc
 
 
 search : String -> Html Msg

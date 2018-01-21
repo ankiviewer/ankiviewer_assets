@@ -105,17 +105,12 @@ type alias Deck =
 
 type alias Model =
     { did : Int
-    , flds : List Fld
+    , flds : List String
     , mid : Int
     , mod : Int
     , name : String
     , showing : Bool
-    }
-
-
-type alias Fld =
-    { name : String
-    , front : Bool
+    , front : Int -- -1: none selected. 0, 1: index of front
     }
 
 
