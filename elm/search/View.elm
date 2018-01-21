@@ -107,15 +107,20 @@ columns : SearchModel -> Html Msg
 columns { columns, filters } =
     tdm ToggleColumn "columns" columns filters.columns
 
-noteMapper : String -> List Column -> List Note -> List (List String)
-noteMapper search nheads ns =
+noteMapper : SearchModel -> List (List String)
+noteMapper model =
     List.filterMap (\n ->
-        if (String.contains search n.front) || (String.contains search n.back) then
-            Just (noteHeadersMapper nheads n [])
+        if filterNote n model then
+            Just (noteHeadersMapper model.columns n [])
         else
             Nothing
     )
-    ns
+    model.notes
+
+filterNote : Note -> SearchModel -> Bool
+filterNote n {search, tags, models, decks} =
+    ((String.contains search n.front) || (String.contains search n.back))
+    && (tags |> List.filter(\t -> t.showing) |> List.all (\t -> String.contains t.name n.tags ))
 
 noteHeadersMapper : List Column -> Note -> List String -> List String
 noteHeadersMapper nheads n acc =
@@ -165,7 +170,7 @@ extractNoteField n {name, showing} =
 
 
 notes : SearchModel -> Html Msg
-notes { columns, notes, search } =
+notes model =
     table []
         [ thead []
             (List.filterMap
@@ -175,7 +180,7 @@ notes { columns, notes, search } =
                     else
                         Nothing
                 )
-                columns
+                model.columns
             )
         , tbody []
             (List.map
@@ -188,6 +193,6 @@ notes { columns, notes, search } =
                             nrow
                         )
                 )
-                (noteMapper search columns notes)
+                (noteMapper model)
             )
         ]
