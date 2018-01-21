@@ -56,7 +56,7 @@ handleModels : List ModelRes -> List Model
 handleModels models =
     List.map
         (\{ did, flds, mid, mod, name } ->
-            Model did flds mid mod name True
+            Model did (List.map (\f -> Fld f False) flds) mid mod name True
         )
         models
 

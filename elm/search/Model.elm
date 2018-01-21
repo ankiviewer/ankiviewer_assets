@@ -38,6 +38,7 @@ initialColumns =
     , (Column "type" False)
     , (Column "queue" False)
     , (Column "due" False)
+    , (Column "ord" False)
     ]
 
 
@@ -104,11 +105,17 @@ type alias Deck =
 
 type alias Model =
     { did : Int
-    , flds : List String
+    , flds : List Fld
     , mid : Int
     , mod : Int
     , name : String
     , showing : Bool
+    }
+
+
+type alias Fld =
+    { name : String
+    , front : Bool
     }
 
 

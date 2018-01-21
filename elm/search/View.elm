@@ -16,6 +16,7 @@ view model =
         , (tags model)
         , (decks model)
         , (models model)
+        , (assignFrontBack model)
         , (columns model)
         , div [] [ text ((model |> noteMapper |> List.length |> toString) ++ " Notes") ]
         , (notes model)
@@ -30,6 +31,26 @@ c =
 cdim : String
 cdim =
     "ba br2 ph2 pv1 lh-tag dib mb1 pointer montserrat mr1 hover-red"
+
+
+assignFrontBack : SearchModel -> Html Msg
+assignFrontBack model =
+    div []
+        [ div [] [ text "front" ]
+        , div []
+            (model.models
+                |> assignFrontBackFilter
+                |> List.map
+                    (\m ->
+                        div [] [ text (toString m.flds) ]
+                    )
+            )
+        ]
+
+
+assignFrontBackFilter : List Model -> List Model
+assignFrontBackFilter models =
+    models
 
 
 search : String -> Html Msg
@@ -183,6 +204,9 @@ extractNoteField n { name, showing } =
 
             "due" ->
                 [ toString n.due ]
+
+            "ord" ->
+                [ toString n.ord ]
 
             _ ->
                 [ "error!!!" ]
