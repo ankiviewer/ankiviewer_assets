@@ -11,7 +11,6 @@ view : SearchModel -> Html Msg
 view model =
     div []
         [ div [] [ text model.error ]
-        , div [] [ text (toString model.models) ]
         , (search model.search)
         , (filters model.filters)
         , (tags model)
@@ -110,7 +109,7 @@ handleAssignFrontBackFilter head acc =
         if List.any (\a -> a.frontBack == (List.sort head.flds)) acc then
            List.map (\a ->
                if a.frontBack == (List.sort head.flds) then
-                  { a | decks = ( head.name :: a.decks )}
+                  { a | decks = ( head.name :: a.decks ) }
               else
                   a
            )
@@ -217,7 +216,7 @@ noteMapper model =
     List.filterMap
         (\n ->
             if filterNote n model then
-                Just (noteHeadersMapper model.columns n [])
+                Just (noteHeadersMapper model.models model.columns n [])
             else
                 Nothing
         )
@@ -232,28 +231,56 @@ filterNote n { search, tags, models, decks } =
         && (models |> List.filter (\m -> m.showing) |> List.any (\m -> n.mid == m.mid))
 
 
-noteHeadersMapper : List Column -> Note -> List String -> List String
-noteHeadersMapper nheads n acc =
-    case nheads of
+noteHeadersMapper : List Model -> List Column -> Note -> List String -> List String
+noteHeadersMapper models columns n acc =
+    case columns of
         [] ->
             []
 
         [ head ] ->
-            acc ++ (extractNoteField n head)
+            acc ++ (extractNoteField models n head)
 
         head :: tail ->
-            noteHeadersMapper tail n (acc ++ (extractNoteField n head))
+            noteHeadersMapper models tail n (acc ++ (extractNoteField models n head))
 
+switchFb : String -> Bool -> Note -> String
+switchFb fb switch note =
+    case (fb, switch) of
+        ("front", True) -> note.back
+        ("back", True) -> note.front
+        ("front", False) -> note.front
+        _ -> note.back
 
-extractNoteField : Note -> Column -> List String
-extractNoteField n { name, showing } =
+handleFrontBack : String -> List Model -> Note -> String
+handleFrontBack fb models note =
+    case (getModel note.mid models) of
+        Just m ->
+            let
+                list = [m.front, note.ord, if m.flds == (List.sort m.flds) then 0 else 1]
+            in
+                if List.all (\l -> l == 0 || l == 1) list then
+                   switchFb fb ((List.sum list) % 2 == 0) note
+                else
+                    note.front
+
+        Nothing ->
+            note.front
+
+getModel : Int -> List Model -> Maybe Model
+getModel mid models =
+    case List.filter (\m -> m.mid == mid) models of
+        [] -> Nothing
+        head :: tail -> Just head
+
+extractNoteField : List Model -> Note -> Column -> List String
+extractNoteField models n { name, showing } =
     if showing then
         case name of
             "front" ->
-                [ n.front ]
+              [ handleFrontBack "front" models n ]
 
             "back" ->
-                [ n.back ]
+                [ handleFrontBack "back" models n ]
 
             "tags" ->
                 [ n.tags ]
