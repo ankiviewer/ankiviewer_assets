@@ -21,7 +21,7 @@ view model =
         , div [] [ text ((model |> noteMapper |> List.length |> toString) ++ " Notes") ]
         , (notes model)
 
-        -- , div [] [ text (toString model.notes) ]
+        , div [] [ text (toString model.notes) ]
         ]
 
 
@@ -275,19 +275,10 @@ handleFrontBack fb models note =
     case (getModel note.mid models) of
         Just m ->
             let
-                list =
-                    [ m.front
-                    , note.ord
-                    , if m.flds == (List.sort m.flds) then
-                        0
-                      else
-                        1
-                    ]
+                ordFront = if m.front == note.ord then 0 else 1
+                switch = if m.flds == (List.sort m.flds) then 0 else 1
             in
-                if List.all (\l -> l == 0 || l == 1) list then
-                    switchFb fb ((List.sum list) % 2 == 0) note
-                else
-                    note.front
+                switchFb fb (((ordFront + switch) % 2) == 1) note
 
         Nothing ->
             note.front
