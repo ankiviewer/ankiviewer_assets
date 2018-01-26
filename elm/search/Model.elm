@@ -20,7 +20,7 @@ initialModel =
         0
         []
         ""
-        (Filters True True True True)
+        (Filters True False False False)
         []
         []
         initialColumns

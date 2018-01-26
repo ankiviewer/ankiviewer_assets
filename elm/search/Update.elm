@@ -146,16 +146,17 @@ update msg model =
                     handleTdmToggle name model.columns
             in
                 ( { model | columns = columns }, Cmd.none )
+
         ToggleFront frontBack front ->
             let
                 models =
                     List.map
                         (\m ->
                             if (List.sort m.flds) == frontBack then
-                               { m | front = front }
-                           else
-                               m
+                                { m | front = front }
+                            else
+                                m
                         )
                         model.models
             in
-               ( { model | models = models }, Cmd.none )
+                ( { model | models = models }, Cmd.none )

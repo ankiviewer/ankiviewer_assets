@@ -20,6 +20,8 @@ view model =
         , (columns model)
         , div [] [ text ((model |> noteMapper |> List.length |> toString) ++ " Notes") ]
         , (notes model)
+
+        -- , div [] [ text (toString model.notes) ]
         ]
 
 
@@ -41,44 +43,47 @@ assignFrontBack model =
             (model.models
                 |> assignFrontBackFilter
                 |> List.map
-                    (\{decks, frontBack, front} ->
+                    (\{ decks, frontBack, front } ->
                         div []
                             [ div [ class "dib" ]
-                                (
-                                    ( decks
+                                ((decks
                                     |> List.map (\d -> div [ class "dib" ] [ text d ])
-                                    |> List.intersperse ( span [] [ text " and " ] )
-                                    ) ++ ( [ span [] [ text ": " ] ] )
+                                    |> List.intersperse (span [] [ text " and " ])
+                                 )
+                                    ++ ([ span [] [ text ": " ] ])
                                 )
                             , div [ class "dib" ]
-                                (
-                                    frontBack
-                                    |> List.indexedMap (\fi fb ->
-                                        div [ class "dib"
-                                            , onClick (ToggleFront frontBack (
-                                                    if front == fi then
-                                                       -1
-                                                    else
-                                                        fi
-                                                   )
-                                               )
-                                            ] [
-                                                text (
-                                                    if front == -1 then
-                                                       fb
-                                                   else if front == fi then
-                                                       "front=" ++ fb
-                                                   else
-                                                       "back=" ++ fb
-                                                )
-                                              ]
-                                    )
-                                    |> List.intersperse ( span [] [ text ", " ] )
-                                )   
+                                (frontBack
+                                    |> List.indexedMap
+                                        (\fi fb ->
+                                            div
+                                                [ class "dib"
+                                                , onClick
+                                                    (ToggleFront frontBack
+                                                        (if front == fi then
+                                                            -1
+                                                         else
+                                                            fi
+                                                        )
+                                                    )
+                                                ]
+                                                [ text
+                                                    (if front == -1 then
+                                                        fb
+                                                     else if front == fi then
+                                                        "front=" ++ fb
+                                                     else
+                                                        "back=" ++ fb
+                                                    )
+                                                ]
+                                        )
+                                    |> List.intersperse (span [] [ text ", " ])
+                                )
                             ]
                     )
             )
         ]
+
 
 type alias AssignFrontBack =
     { decks : List String
@@ -91,33 +96,38 @@ assignFrontBackFilter : List Model -> List AssignFrontBack
 assignFrontBackFilter models =
     assignFrontBackFilterRecursive models []
 
+
 assignFrontBackFilterRecursive : List Model -> List AssignFrontBack -> List AssignFrontBack
 assignFrontBackFilterRecursive models acc =
     case models of
         [] ->
             []
+
         [ head ] ->
             handleAssignFrontBackFilter head acc
+
         head :: tail ->
             acc
-            |> handleAssignFrontBackFilter head
-            |> assignFrontBackFilterRecursive tail
+                |> handleAssignFrontBackFilter head
+                |> assignFrontBackFilterRecursive tail
+
 
 handleAssignFrontBackFilter : Model -> List AssignFrontBack -> List AssignFrontBack
 handleAssignFrontBackFilter head acc =
     if head.showing then
         if List.any (\a -> a.frontBack == (List.sort head.flds)) acc then
-           List.map (\a ->
-               if a.frontBack == (List.sort head.flds) then
-                  { a | decks = ( head.name :: a.decks ) }
-              else
-                  a
-           )
-           acc
-       else
-           { decks = [ head.name ], frontBack = (List.sort head.flds), front = head.front } :: acc
-   else
-       acc
+            List.map
+                (\a ->
+                    if a.frontBack == (List.sort head.flds) then
+                        { a | decks = (head.name :: a.decks) }
+                    else
+                        a
+                )
+                acc
+        else
+            { decks = [ head.name ], frontBack = (List.sort head.flds), front = head.front } :: acc
+    else
+        acc
 
 
 search : String -> Html Msg
@@ -243,41 +253,62 @@ noteHeadersMapper models columns n acc =
         head :: tail ->
             noteHeadersMapper models tail n (acc ++ (extractNoteField models n head))
 
+
 switchFb : String -> Bool -> Note -> String
 switchFb fb switch note =
-    case (fb, switch) of
-        ("front", True) -> note.back
-        ("back", True) -> note.front
-        ("front", False) -> note.front
-        _ -> note.back
+    case ( fb, switch ) of
+        ( "front", True ) ->
+            note.back
+
+        ( "back", True ) ->
+            note.front
+
+        ( "front", False ) ->
+            note.front
+
+        _ ->
+            note.back
+
 
 handleFrontBack : String -> List Model -> Note -> String
 handleFrontBack fb models note =
     case (getModel note.mid models) of
         Just m ->
             let
-                list = [m.front, note.ord, if m.flds == (List.sort m.flds) then 0 else 1]
+                list =
+                    [ m.front
+                    , note.ord
+                    , if m.flds == (List.sort m.flds) then
+                        0
+                      else
+                        1
+                    ]
             in
                 if List.all (\l -> l == 0 || l == 1) list then
-                   switchFb fb ((List.sum list) % 2 == 0) note
+                    switchFb fb ((List.sum list) % 2 == 0) note
                 else
                     note.front
 
         Nothing ->
             note.front
 
+
 getModel : Int -> List Model -> Maybe Model
 getModel mid models =
     case List.filter (\m -> m.mid == mid) models of
-        [] -> Nothing
-        head :: tail -> Just head
+        [] ->
+            Nothing
+
+        head :: tail ->
+            Just head
+
 
 extractNoteField : List Model -> Note -> Column -> List String
 extractNoteField models n { name, showing } =
     if showing then
         case name of
             "front" ->
-              [ handleFrontBack "front" models n ]
+                [ handleFrontBack "front" models n ]
 
             "back" ->
                 [ handleFrontBack "back" models n ]
