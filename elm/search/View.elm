@@ -232,10 +232,34 @@ noteMapper model =
         )
         model.notes
 
+stringInFrontBack : String -> String -> Bool
+stringInFrontBack search fb =
+    (String.contains (simplifyString search) (simplifyString fb))
+
+simplifyString : String -> String
+simplifyString str =
+    str
+    |> String.toLower
+    |> String.trim
+    |> String.map mapChars
+    |> String.filter filterChars
+
+mapChars : Char -> Char
+mapChars c =
+    case c of
+        'ß' -> 's'
+        'ä' -> 'a'
+        'ö' -> 'o'
+        'ü' -> 'u'
+        _ -> c
+
+filterChars : Char -> Bool
+filterChars c =
+    not (List.member c ['.', '-', '?', ','])
 
 filterNote : Note -> SearchModel -> Bool
 filterNote n { search, tags, models, decks } =
-    ((String.contains search n.front) || (String.contains search n.back))
+    ((stringInFrontBack search n.front) || stringInFrontBack search n.back)
         && (tags |> List.filter (\t -> t.showing) |> List.all (\t -> String.contains t.name n.tags))
         && (decks |> List.filter (\d -> d.showing) |> List.any (\d -> n.did == d.did))
         && (models |> List.filter (\m -> m.showing) |> List.any (\m -> n.mid == m.mid))
