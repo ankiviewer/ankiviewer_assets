@@ -47,14 +47,15 @@ handleTdmToggle name tdms =
 handleTags : List Tag -> List String -> List Tag
 handleTags mtags tags =
     List.map
-    (\t ->
-        case find (\mt -> mt.name == t) mtags of
-            Just mt ->
-                mt
-            Nothing ->
-                Tag t True
-    )
-    tags
+        (\t ->
+            case find (\mt -> mt.name == t) mtags of
+                Just mt ->
+                    mt
+
+                Nothing ->
+                    Tag t True
+        )
+        tags
 
 
 handleModels : List Model -> List ModelRes -> List Model
@@ -64,6 +65,7 @@ handleModels mmodels models =
             case find (\mm -> mm.mid == mid) mmodels of
                 Just mm ->
                     mm
+
                 Nothing ->
                     Model did flds mid mod name True -1
         )
@@ -77,10 +79,12 @@ handleDecks mdecks decks =
             case find (\md -> md.did == did) mdecks of
                 Just dm ->
                     dm
+
                 Nothing ->
                     Deck did mod name True
         )
         decks
+
 
 update : Msg -> SearchModel -> ( SearchModel, Cmd Msg )
 update msg model =
@@ -106,7 +110,7 @@ update msg model =
                     , models = (handleModels model.models models)
                     , decks = (handleDecks model.decks decks)
                   }
-                , fetchNotes
+                , fetchNotes model
                 )
 
         FetchedCollection (Err unknownErr) ->
@@ -121,8 +125,12 @@ update msg model =
         FetchedNotes (Err unknownErr) ->
             ( { model | error = (toString unknownErr) }, Cmd.none )
 
-        Search str ->
-            ( { model | search = str }, Cmd.none )
+        Search search ->
+            let
+                newModel =
+                    { model | search = search }
+            in
+                ( newModel, fetchNotes newModel )
 
         ToggleFilter name ->
             let
@@ -135,22 +143,31 @@ update msg model =
             let
                 tags =
                     handleTdmToggle name model.tags
+
+                newModel =
+                    { model | tags = tags }
             in
-                ( { model | tags = tags }, Cmd.none )
+                ( newModel, fetchNotes newModel )
 
         ToggleDeck name ->
             let
                 decks =
                     handleTdmToggle name model.decks
+
+                newModel =
+                    { model | decks = decks }
             in
-                ( { model | decks = decks }, Cmd.none )
+                ( { model | decks = decks }, fetchNotes newModel )
 
         ToggleModel name ->
             let
                 models =
                     handleTdmToggle name model.models
+
+                newModel =
+                    { model | models = models }
             in
-                ( { model | models = models }, Cmd.none )
+                ( { model | models = models }, fetchNotes newModel )
 
         ToggleColumn name ->
             let

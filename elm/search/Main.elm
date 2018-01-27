@@ -17,17 +17,21 @@ main =
         , subscriptions = \_ -> Sub.none
         }
 
+
 port setStorage : SearchModel -> Cmd msg
+
 
 updateWithStorage : Msg -> SearchModel -> ( SearchModel, Cmd Msg )
 updateWithStorage msg model =
     let
-        ( newModel, cmds ) = update msg model
+        ( newModel, cmds ) =
+            update msg model
     in
-       ( newModel
-       , Cmd.batch [ setStorage { newModel | notes = [] }, cmds ]
-       )
+        ( newModel
+        , Cmd.batch [ setStorage { newModel | notes = [] }, cmds ]
+        )
+
 
 init : Maybe SearchModel -> ( SearchModel, Cmd Msg )
 init savedModel =
-    (Maybe.withDefault initialModel savedModel, fetchCollection)
+    ( Maybe.withDefault initialModel savedModel, fetchCollection )

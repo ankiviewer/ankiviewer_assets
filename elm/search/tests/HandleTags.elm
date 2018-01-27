@@ -6,25 +6,30 @@ import Test exposing (..)
 import Model exposing (..)
 import Update exposing (handleTags)
 
+
 suite : Test
 suite =
     describe "suite"
         [ describe "handleTags"
             [ test "first" <|
-                \_ -> 
+                \_ ->
                     let
                         tags : List String
                         tags =
                             [ "one"
                             , "three"
                             ]
+
                         mtags : List Tag
-                        mtags = 
+                        mtags =
                             [ Tag "one" False
                             , Tag "two" True
                             ]
+
                         actual : List Tag
-                        actual = handleTags mtags tags
+                        actual =
+                            handleTags mtags tags
+
                         expected : List Tag
                         expected =
                             [ Tag "one" False

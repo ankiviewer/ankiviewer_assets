@@ -19,6 +19,7 @@ view model =
         , (models model)
         , (assignFrontBack model)
         , (columns model)
+
         -- , div [] [ text ((model |> noteMapper |> List.length |> toString) ++ " Notes") ]
         , (notes model)
         ]
@@ -162,7 +163,7 @@ tdm : (String -> Msg) -> String -> List (Tdm a) -> Bool -> Html Msg
 tdm msg str tdms filter =
     div
         [ classList
-            [ ("dn", not filter) ]
+            [ ( "dn", not filter ) ]
         ]
         [ div [] [ text (str ++ ":") ]
         , div []
@@ -216,41 +217,55 @@ columns { columns, filters } =
     tdm ToggleColumn "columns" columns filters.columns
 
 
-noteMapper : SearchModel -> List ( String, (List String) )
+noteMapper : SearchModel -> List ( String, List String )
 noteMapper model =
     List.filterMap
         (\n ->
             if filterNote n model then
-                Just ((toString n.nid), noteHeadersMapper model.models model.columns n [])
+                Just ( (toString n.nid), noteHeadersMapper model.models model.columns n [] )
             else
                 Nothing
         )
         model.notes
 
+
 stringInFrontBack : String -> String -> Bool
 stringInFrontBack search fb =
     (String.contains (simplifyString search) (simplifyString fb))
 
+
 simplifyString : String -> String
 simplifyString str =
     str
-    |> String.toLower
-    |> String.trim
-    |> String.map mapChars
-    |> String.filter filterChars
+        |> String.toLower
+        |> String.trim
+        |> String.map mapChars
+        |> String.filter filterChars
+
 
 mapChars : Char -> Char
 mapChars c =
     case c of
-        'ß' -> 's'
-        'ä' -> 'a'
-        'ö' -> 'o'
-        'ü' -> 'u'
-        _ -> c
+        'ß' ->
+            's'
+
+        'ä' ->
+            'a'
+
+        'ö' ->
+            'o'
+
+        'ü' ->
+            'u'
+
+        _ ->
+            c
+
 
 filterChars : Char -> Bool
 filterChars c =
-    not (List.member c ['.', '-', '?', ','])
+    not (List.member c [ '.', '-', '?', ',' ])
+
 
 filterNote : Note -> SearchModel -> Bool
 filterNote n { search, tags, models, decks } =
@@ -294,7 +309,11 @@ handleFrontBack fb models note =
     case (getModel note.mid models) of
         Just m ->
             let
-                switch = if m.flds == (List.sort m.flds) then 0 else 1
+                switch =
+                    if m.flds == (List.sort m.flds) then
+                        0
+                    else
+                        1
             in
                 switchFb fb (((m.front + switch) % 2) == 1) note
 
@@ -348,16 +367,17 @@ extractNoteField models n { name, showing } =
     else
         []
 
+
 keyedTbody : List (Attribute msg) -> List ( String, Html msg ) -> Html msg
 keyedTbody =
-  Keyed.node "tbody"
+    Keyed.node "tbody"
 
 
 notes : SearchModel -> Html Msg
 notes model =
     table []
-        [ thead []
-             <| notesHeaders model.columns
+        [ thead [] <|
+            notesHeaders model.columns
         , keyedTbody []
             (List.map
                 notesKeyedRow
@@ -365,16 +385,18 @@ notes model =
             )
         ]
 
+
 notesHeaders : List Column -> List (Html Msg)
 notesHeaders columns =
     List.filterMap
-        (\{ name, showing } -> 
+        (\{ name, showing } ->
             if showing then
-               Just (th [] [ text name ])
-           else
-               Nothing
+                Just (th [] [ text name ])
+            else
+                Nothing
         )
         columns
+
 
 notesRow : List String -> Html Msg
 notesRow rows =
@@ -384,9 +406,12 @@ notesRow rows =
             rows
         )
 
+
 notesKeyedRow : ( String, List String ) -> ( String, Html Msg )
 notesKeyedRow ( nid, rows ) =
     ( nid, notesRow rows )
 
+
 notesCell : String -> Html Msg
-notesCell cell = td [] [ text cell ]
+notesCell cell =
+    td [] [ text cell ]

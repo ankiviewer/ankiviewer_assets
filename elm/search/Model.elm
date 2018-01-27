@@ -13,6 +13,7 @@ type alias SearchModel =
     , error : String
     }
 
+
 initialModel : SearchModel
 initialModel =
     SearchModel
@@ -25,6 +26,7 @@ initialModel =
         initialColumns
         []
         ""
+
 
 initialColumns : List Column
 initialColumns =

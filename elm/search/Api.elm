@@ -17,13 +17,43 @@ fetchCollection =
         Http.send FetchedCollection request
 
 
-fetchNotes : Cmd Msg
-fetchNotes =
+type alias Showing a =
+    { a | showing : Bool }
+
+
+createQuery : List (Showing a) -> (Showing a -> String) -> String
+createQuery listModel extractKey =
+    listModel
+        |> List.filterMap
+            (\m ->
+                if m.showing then
+                    Just (extractKey m)
+                else
+                    Nothing
+            )
+        |> String.join ","
+
+
+fetchNotes : SearchModel -> Cmd Msg
+fetchNotes model =
     let
-        request =
-            Http.get "/api/notes" decodeNotes
+        search =
+            "search=" ++ model.search
+
+        tags =
+            "tags=" ++ (createQuery model.tags .name)
+
+        decks =
+            "decks=" ++ (createQuery model.decks (\d -> (toString d.did)))
+
+        models =
+            "models=" ++ (createQuery model.models (\m -> (toString m.mid)))
+
+        params =
+            String.join "&" [ search, tags, decks, models ]
     in
-        Http.send FetchedNotes request
+        Http.send FetchedNotes <|
+            Http.get ("/api/notes?" ++ params) decodeNotes
 
 
 decodeNotes : Decoder NotesRes
