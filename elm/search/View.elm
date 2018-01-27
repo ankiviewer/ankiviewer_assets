@@ -3,6 +3,7 @@ module View exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (class, classList, placeholder)
 import Html.Events exposing (onClick, onInput)
+import Html.Keyed as Keyed
 import Msg exposing (..)
 import Model exposing (..)
 
@@ -18,7 +19,7 @@ view model =
         , (models model)
         , (assignFrontBack model)
         , (columns model)
-        , div [] [ text ((model |> noteMapper |> List.length |> toString) ++ " Notes") ]
+        -- , div [] [ text ((model |> noteMapper |> List.length |> toString) ++ " Notes") ]
         , (notes model)
         ]
 
@@ -215,12 +216,12 @@ columns { columns, filters } =
     tdm ToggleColumn "columns" columns filters.columns
 
 
-noteMapper : SearchModel -> List (List String)
+noteMapper : SearchModel -> List ( String, (List String) )
 noteMapper model =
     List.filterMap
         (\n ->
             if filterNote n model then
-                Just (noteHeadersMapper model.models model.columns n [])
+                Just ((toString n.nid), noteHeadersMapper model.models model.columns n [])
             else
                 Nothing
         )
@@ -347,31 +348,45 @@ extractNoteField models n { name, showing } =
     else
         []
 
+keyedTbody : List (Attribute msg) -> List ( String, Html msg ) -> Html msg
+keyedTbody =
+  Keyed.node "tbody"
+
 
 notes : SearchModel -> Html Msg
 notes model =
     table []
         [ thead []
-            (List.filterMap
-                (\{ name, showing } ->
-                    if showing then
-                        Just (th [] [ text name ])
-                    else
-                        Nothing
-                )
-                model.columns
-            )
-        , tbody []
+             <| notesHeaders model.columns
+        , keyedTbody []
             (List.map
-                (\nrow ->
-                    tr []
-                        (List.map
-                            (\ncol ->
-                                td [] [ text ncol ]
-                            )
-                            nrow
-                        )
-                )
+                notesKeyedRow
                 (noteMapper model)
             )
         ]
+
+notesHeaders : List Column -> List (Html Msg)
+notesHeaders columns =
+    List.filterMap
+        (\{ name, showing } -> 
+            if showing then
+               Just (th [] [ text name ])
+           else
+               Nothing
+        )
+        columns
+
+notesRow : List String -> Html Msg
+notesRow rows =
+    tr []
+        (List.map
+            notesCell
+            rows
+        )
+
+notesKeyedRow : ( String, List String ) -> ( String, Html Msg )
+notesKeyedRow ( nid, rows ) =
+    ( nid, notesRow rows )
+
+notesCell : String -> Html Msg
+notesCell cell = td [] [ text cell ]
