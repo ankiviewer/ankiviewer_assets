@@ -47,7 +47,7 @@ handleTags : List String -> List Tag
 handleTags tags =
     List.map
         (\t ->
-            Tag t True
+            Tag t False
         )
         tags
 
@@ -68,7 +68,6 @@ handleDecks decks =
             Deck did mod name True
         )
         decks
-
 
 update : Msg -> SearchModel -> ( SearchModel, Cmd Msg )
 update msg model =

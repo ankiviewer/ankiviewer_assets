@@ -1,4 +1,4 @@
-module Search exposing (..)
+port module Search exposing (..)
 
 import Html
 import Model exposing (SearchModel, initialModel)
@@ -8,16 +8,26 @@ import Update exposing (update)
 import Api exposing (fetchCollection)
 
 
-main : Program Never SearchModel Msg
+main : Program (Maybe SearchModel) SearchModel Msg
 main =
-    Html.program
+    Html.programWithFlags
         { init = init
         , view = view
-        , update = update
+        , update = updateWithStorage
         , subscriptions = \_ -> Sub.none
         }
 
+port setStorage : SearchModel -> Cmd msg
 
-init : ( SearchModel, Cmd Msg )
-init =
-    ( initialModel, fetchCollection )
+updateWithStorage : Msg -> SearchModel -> ( SearchModel, Cmd Msg )
+updateWithStorage msg model =
+    let
+        ( newModel, cmds ) = update msg model
+    in
+       ( newModel
+       , Cmd.batch [ setStorage newModel, cmds ]
+       )
+
+init : Maybe SearchModel -> ( SearchModel, Cmd Msg )
+init savedModel =
+    (Maybe.withDefault initialModel savedModel, fetchCollection)

@@ -1,7 +1,7 @@
 module View exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (class, placeholder)
+import Html.Attributes exposing (class, classList, placeholder)
 import Html.Events exposing (onClick, onInput)
 import Msg exposing (..)
 import Model exposing (..)
@@ -162,12 +162,8 @@ filters { tags, models, decks, columns } =
 tdm : (String -> Msg) -> String -> List (Tdm a) -> Bool -> Html Msg
 tdm msg str tdms filter =
     div
-        [ class
-            (if filter then
-                ""
-             else
-                "dn"
-            )
+        [ classList
+            [ ("dn", not filter) ]
         ]
         [ div [] [ text (str ++ ":") ]
         , div []
