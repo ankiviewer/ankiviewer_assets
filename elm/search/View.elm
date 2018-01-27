@@ -20,8 +20,6 @@ view model =
         , (columns model)
         , div [] [ text ((model |> noteMapper |> List.length |> toString) ++ " Notes") ]
         , (notes model)
-
-        -- , div [] [ text (toString model.notes) ]
         ]
 
 

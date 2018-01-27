@@ -25,7 +25,7 @@ updateWithStorage msg model =
         ( newModel, cmds ) = update msg model
     in
        ( newModel
-       , Cmd.batch [ setStorage newModel, cmds ]
+       , Cmd.batch [ setStorage { newModel | notes = [] }, cmds ]
        )
 
 init : Maybe SearchModel -> ( SearchModel, Cmd Msg )

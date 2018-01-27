@@ -1,8 +1,9 @@
-module Update exposing (update)
+module Update exposing (..)
 
 import Msg exposing (..)
 import Model exposing (..)
 import Api exposing (fetchNotes)
+import List.Extra exposing (..)
 
 
 handleFilters : String -> Filters -> Filters
@@ -43,29 +44,41 @@ handleTdmToggle name tdms =
             tdms
 
 
-handleTags : List String -> List Tag
-handleTags tags =
+handleTags : List Tag -> List String -> List Tag
+handleTags mtags tags =
     List.map
-        (\t ->
-            Tag t False
-        )
-        tags
+    (\t ->
+        case find (\mt -> mt.name == t) mtags of
+            Just mt ->
+                mt
+            Nothing ->
+                Tag t True
+    )
+    tags
 
 
-handleModels : List ModelRes -> List Model
-handleModels models =
+handleModels : List Model -> List ModelRes -> List Model
+handleModels mmodels models =
     List.map
         (\{ did, flds, mid, mod, name } ->
-            Model did flds mid mod name True -1
+            case find (\mm -> mm.mid == mid) mmodels of
+                Just mm ->
+                    mm
+                Nothing ->
+                    Model did flds mid mod name True -1
         )
         models
 
 
-handleDecks : List DeckRes -> List Deck
-handleDecks decks =
+handleDecks : List Deck -> List DeckRes -> List Deck
+handleDecks mdecks decks =
     List.map
         (\{ did, mod, name } ->
-            Deck did mod name True
+            case find (\md -> md.did == did) mdecks of
+                Just dm ->
+                    dm
+                Nothing ->
+                    Deck did mod name True
         )
         decks
 
@@ -89,9 +102,9 @@ update msg model =
                 ( { model
                     | error = error
                     , crt = crt
-                    , tags = (handleTags tags)
-                    , models = (handleModels models)
-                    , decks = (handleDecks decks)
+                    , tags = (handleTags model.tags tags)
+                    , models = (handleModels model.models models)
+                    , decks = (handleDecks model.decks decks)
                   }
                 , fetchNotes
                 )
